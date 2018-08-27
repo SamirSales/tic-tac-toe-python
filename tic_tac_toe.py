@@ -12,18 +12,18 @@ class Player(object):
         self.mark = mark
 
 def display_label():
-    print '\n    ***********************'
-    print '    *    JOGO DA VELHA    *'
-    print '    ***********************\n'
+    print ('\n    ***********************')
+    print ('    *    JOGO DA VELHA    *')
+    print ('    ***********************\n')
 
 def display_layout():
     os.system('clear')
     display_label()
-    print '            1  2  3'
-    print '         a %s|%s|%s' % (coords[0][0], coords[0][1], coords[0][2])
-    print '         b %s|%s|%s' % (coords[1][0], coords[1][1], coords[1][2])
-    print '         c %s|%s|%s' % (coords[2][0], coords[2][1], coords[2][2])
-    print '\n'
+    print ('            1  2  3')
+    print ('         a %s|%s|%s' % (coords[0][0], coords[0][1], coords[0][2]))
+    print ('         b %s|%s|%s' % (coords[1][0], coords[1][1], coords[1][2]))
+    print ('         c %s|%s|%s' % (coords[2][0], coords[2][1], coords[2][2]))
+    print ('\n')
 
 def set_players(num, mark):
     os.system('clear')
@@ -31,22 +31,22 @@ def set_players(num, mark):
     player_name = ''
 
     while(player_name.strip() == ''):
-        player_name = raw_input('    Digite o nome do jogador %d: ' % (num))
+        player_name = input('    Digite o nome do jogador %d: ' % (num))
         if player_name.strip() == '':
-            print '    O jogador %d ainda precisa de um nome.\n' % (num)
+            print ('    O jogador %d ainda precisa de um nome.\n' % (num))
     return Player(player_name, num, mark)
 
 def display_information():
     display_layout()
-    print ' ______________________________________________________________'
-    print '| COMO JOGAR:                                                  |'
-    print '|                                                              |'
-    print '| Para fazer uma jogada, digite a linha, coluna desejada,      |'
-    print '| e depois tecle [ENTER].                                      |'
-    print '|                                                              |'
-    print '| Exemplo: \"a1\", \"b3\", \"c2\"...                                 |'
-    print '|______________________________________________________________|\n\n'
-    raw_input('Tecle [ENTER] para continuar... ')
+    print (' ______________________________________________________________')
+    print ('| COMO JOGAR:                                                  |')
+    print ('|                                                              |')
+    print ('| Para fazer uma jogada, digite a linha, coluna desejada,      |')
+    print ('| e depois tecle [ENTER].                                      |')
+    print ('|                                                              |')
+    print ('| Exemplo: \"a1\", \"b3\", \"c2\"...                                 |')
+    print ('|______________________________________________________________|\n\n')
+    input('Tecle [ENTER] para continuar... ')
 
 def someone_wins():
     # verify the rows
@@ -86,9 +86,9 @@ def incorrect_column(move):
 def player_move(player):
     move = ''
     while move.strip() == '':
-        move = raw_input('  %s joga: ' % (player.name))
+        move = input('  %s joga: ' % (player.name))
         if(len(move) < 2 or incorrect_row(move) or incorrect_column(move)):
-            print '  Jogada inválida.\n'
+            print ('  Jogada inválida.\n')
             move = ''
         else:
             row = 0
@@ -104,11 +104,11 @@ def player_move(player):
             elif coords[row][column] == null_2:
                 coords[row][column] = ' ' + player.mark
             else:
-                print '  Essa jogada já foi feita.\n'
+                print ('  Essa jogada já foi feita.\n')
                 move = ''
     if someone_wins() :
         display_layout()
-        print '    %s VENCE!!!!!!!!!\n' % player.name
+        print ('    %s VENCE!!!!!!!!!\n' % player.name)
 
 # setting the players --------------------------------
 player_1 = set_players(1, 'x')
@@ -130,5 +130,5 @@ while(not someone_wins()):
 
     if nobody_wins():
         display_layout()
-        print '    Ninguém ganhou.\n'
+        print ('    Ninguém ganhou.\n')
         break

@@ -1,79 +1,78 @@
 # coding=UTF-8
 import os
 
-null_1 = '__'
-null_2 = '  '
-coords = [[null_1,null_1,null_1], [null_1,null_1,null_1], [null_2,null_2,null_2]]
+null_mark_1 = '__'
+null_mark_2 = '  '
+coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,null_mark_1], [null_mark_2,null_mark_2,null_mark_2]]
 
 class Player(object):
-    def __init__(self, name, num, mark):
+    def __init__(self, name, number, symbol):
         self.name = name
-        self.num = num
-        self.mark = mark
+        self.number = number
+        self.symbol = symbol
 
 def display_label():
     print ('\n    ***********************')
-    print ('    *    JOGO DA VELHA    *')
+    print ('    *     TIC TAC TOE     *')
     print ('    ***********************\n')
 
 def display_layout():
     os.system('clear')
     display_label()
     print ('            1  2  3')
-    print ('         a %s|%s|%s' % (coords[0][0], coords[0][1], coords[0][2]))
-    print ('         b %s|%s|%s' % (coords[1][0], coords[1][1], coords[1][2]))
-    print ('         c %s|%s|%s' % (coords[2][0], coords[2][1], coords[2][2]))
+    print ('         a %s|%s|%s' % (coordinates[0][0], coordinates[0][1], coordinates[0][2]))
+    print ('         b %s|%s|%s' % (coordinates[1][0], coordinates[1][1], coordinates[1][2]))
+    print ('         c %s|%s|%s' % (coordinates[2][0], coordinates[2][1], coordinates[2][2]))
     print ('\n')
 
-def set_players(num, mark):
+def set_players(number, symbol):
     os.system('clear')
     display_label()
     player_name = ''
 
     while(player_name.strip() == ''):
-        player_name = input('    Digite o nome do jogador %d: ' % (num))
+        player_name = input('    Enter the name of the player %d: ' % (number))
         if player_name.strip() == '':
-            print ('    O jogador %d ainda precisa de um nome.\n' % (num))
-    return Player(player_name, num, mark)
+            print ('    The player %d still needs a name.\n' % (number))
+    return Player(player_name, number, symbol)
 
 def display_information():
     display_layout()
-    print (' ______________________________________________________________')
-    print ('| COMO JOGAR:                                                  |')
-    print ('|                                                              |')
-    print ('| Para fazer uma jogada, digite a linha, coluna desejada,      |')
-    print ('| e depois tecle [ENTER].                                      |')
-    print ('|                                                              |')
-    print ('| Exemplo: \"a1\", \"b3\", \"c2\"...                                 |')
-    print ('|______________________________________________________________|\n\n')
-    input('Tecle [ENTER] para continuar... ')
+    print (' ________________________________________________________________')
+    print ('| HOW TO PLAY:                                                   |')
+    print ('|                                                                |')
+    print ('| To make a move, enter the row, column, and then press [ENTER]. |')
+    print ('|                                                                |')
+    print ('| Example: \"a1\", \"b3\", \"c2\"...                                   |')
+    print ('|________________________________________________________________|\n\n')
+    input('Press [ENTER] to continue... ')
 
 def someone_wins():
     # verify the rows
-    if coords[0][0][1] == coords[0][1][1] and coords[0][0][1] == coords[0][2][1] and coords[0][0][1] != null_1[1]:
+    if coordinates[0][0][1] == coordinates[0][1][1] and coordinates[0][0][1] == coordinates[0][2][1] and coordinates[0][0][1] != null_mark_1[1]:
         return True
-    elif coords[1][0][1] == coords[1][1][1] and coords[1][0][1] == coords[1][2][1] and coords[1][0][1] != null_1[1]:
+    elif coordinates[1][0][1] == coordinates[1][1][1] and coordinates[1][0][1] == coordinates[1][2][1] and coordinates[1][0][1] != null_mark_1[1]:
         return True
-    elif coords[2][0][1] == coords[2][1][1] and coords[2][0][1] == coords[2][2][1] and coords[2][0][1] != null_2[1]:
+    elif coordinates[2][0][1] == coordinates[2][1][1] and coordinates[2][0][1] == coordinates[2][2][1] and coordinates[2][0][1] != null_mark_2[1]:
         return True
     # verify the columns
-    elif(coords[0][0][1] == coords[1][0][1] and coords[0][0][1] == coords[2][0][1]):
+    elif(coordinates[0][0][1] == coordinates[1][0][1] and coordinates[0][0][1] == coordinates[2][0][1]):
         return True
-    elif(coords[0][1][1] == coords[1][1][1] and coords[0][1][1] == coords[2][1][1]):
+    elif(coordinates[0][1][1] == coordinates[1][1][1] and coordinates[0][1][1] == coordinates[2][1][1]):
         return True
-    elif(coords[0][2][1] == coords[1][2][1] and coords[0][2][1] == coords[2][2][1]):
+    elif(coordinates[0][2][1] == coordinates[1][2][1] and coordinates[0][2][1] == coordinates[2][2][1]):
         return True
     # verify the diagonals
-    elif(coords[0][0][1] == coords[1][1][1] and coords[0][0][1] == coords[2][2][1]):
+    elif(coordinates[0][0][1] == coordinates[1][1][1] and coordinates[0][0][1] == coordinates[2][2][1]):
         return True
-    elif(coords[0][2][1] == coords[1][1][1] and coords[0][2][1] == coords[2][0][1]):
+    elif(coordinates[0][2][1] == coordinates[1][1][1] and coordinates[0][2][1] == coordinates[2][0][1]):
         return True
     return False
 
 def nobody_wins():
-    for row in coords:
+    for row in coordinates:
         for col in row:
-            if col == null_1 or col == null_2:
+            if col == null_mark_1 or col == null_mark_2:
                 return False
     return not someone_wins()
 
@@ -86,9 +85,9 @@ def incorrect_column(move):
 def player_move(player):
     move = ''
     while move.strip() == '':
-        move = input('  %s joga: ' % (player.name))
+        move = input('  %s plays: ' % (player.name))
         if(len(move) < 2 or incorrect_row(move) or incorrect_column(move)):
-            print ('  Jogada inválida.\n')
+            print ('  Wrong move.\n')
             move = ''
         else:
             row = 0
@@ -99,36 +98,38 @@ def player_move(player):
             elif move[0] == 'c':
                 row = 2
             column = int(move[1]) - 1
-            if coords[row][column] == null_1:
-                coords[row][column] = '_' + player.mark
-            elif coords[row][column] == null_2:
-                coords[row][column] = ' ' + player.mark
+            if coordinates[row][column] == null_mark_1:
+                coordinates[row][column] = '_' + player.symbol
+            elif coordinates[row][column] == null_mark_2:
+                coordinates[row][column] = ' ' + player.symbol
             else:
-                print ('  Essa jogada já foi feita.\n')
+                print ('  This move has already been made.\n')
                 move = ''
     if someone_wins() :
         display_layout()
-        print ('    %s VENCE!!!!!!!!!\n' % player.name)
+        print ('    %s WINS!!!!!!!!!\n' % player.name)
 
-# setting the players --------------------------------
-player_1 = set_players(1, 'x')
-player_2 = set_players(2, 'o')
-display_information()
+def start_game(player1, player2):
+    player1_turn = True
 
-# starting the game ----------------------------------
-player_1_turn = True
-
-while(not someone_wins()):
-    display_layout()
-
-    if(player_1_turn):
-        player_move(player_1)
-    else:
-        player_move(player_2)
-
-    player_1_turn = not player_1_turn
-
-    if nobody_wins():
+    while(not someone_wins()):
         display_layout()
-        print ('    Ninguém ganhou.\n')
-        break
+
+        if(player1_turn):
+            player_move(player1)
+        else:
+            player_move(player2)
+
+        player1_turn = not player1_turn
+
+        if nobody_wins():
+            display_layout()
+            print ('    Draw game.\n')
+            break
+
+# settings and starting the game --------------------------------
+player1 = set_players(1, 'x')
+player2 = set_players(2, 'o')
+display_information()
+start_game(player1, player2)
+

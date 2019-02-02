@@ -1,10 +1,8 @@
-# Jogo da Velha em Python
-Esse projeto foi um exercício de fixação. Depois de uma boa estudada na linguagem Python, achei interessante ver algo que aprendi executando no terminal do Linux.
+# Tic Tac Toe in Python
+This project was a fixation exercise. After study the Python language, I thought it would be interesting to see something I've learned running on the Linux terminal.
 
-## Funcionamento atual
-* Primeiramento, dois jogadores digitam seus nomes;
-* Em, seguida, as instruções do jogo são apresentadas;
-* E o jogo segue até alguém vencer ou até dar empate.
+## Current operation
+* First, two players enter their names;
+* Then, the game's instructions are displayed;
+* And the game goes on until someone wins or even draws.
 
-## Ilustração
-![Screenshot](jogodavelha.png)

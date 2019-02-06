@@ -5,11 +5,23 @@ from random import shuffle
 null_mark_1 = '__'
 null_mark_2 = '  '
 coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,null_mark_1], [null_mark_2,null_mark_2,null_mark_2]]
-coordinates_ai_values = [[2,4,8],[16,32,64],[128,256,512]]
+# coordinates_ai_values = [[2,4,8],[16,32,64],[128,256,512]]
+# coordinates_ai_values = [[2, 3, 5], [7, 11, 13], [17, 19, 23]]
+# coordinates_ai_values = [[2, 3, 7], [13, 26, 52], [79, 132, 212]]
+coordinates_ai_values = [[1,2,6], [24,120,720], [5040,40320,362880]]
+
 
 BLACKLIST_FILE_NAME = "blacklist_moves.txt"
 blacklist_file_exists = False
 blacklist = []
+
+WHITE_FILE_NAME = "whitelist_moves.txt"
+whitelist_file_exists = False
+whitelist = []
+
+GREY_FILE_NAME = "whitelist_moves.txt"
+greylist_file_exists = False
+greylist = []
 
 
 class Player(object):
@@ -28,15 +40,9 @@ def display_label():
     print ('    ***********************\n')
 
 
-def display_blacklist():
-    print('blacklist moves: %s' % blacklist)
-    print ('\n')
-
-
 def display_layout():
     os.system('clear')
     display_label()
-    # display_blacklist()
     print ('            1  2  3')
     print ('         a %s|%s|%s' % (coordinates[0][0], coordinates[0][1], coordinates[0][2]))
     print ('         b %s|%s|%s' % (coordinates[1][0], coordinates[1][1], coordinates[1][2]))
@@ -133,7 +139,7 @@ def get_current_move_result(player):
     return result
 
 
-def artificial_intelligence_move(player):
+def artificial_intelligence_move(player, adversary):
     options = []
     rows = ['a', 'b', 'c']
     cols = ['1', '2', '3']
@@ -148,22 +154,27 @@ def artificial_intelligence_move(player):
                 new_move = [(rows[index_r] + cols[index_c]), coordinates_ai_values[index_r][index_c]]
                 options.append(new_move)
 
-    shuffle(options)
-
+    # good to avoid the same draw game
+    shuffle(options) 
+    current_move_result = get_current_move_result(player)
+    
     for option in options:
-        if (get_current_move_result(player) + option[1]) not in blacklist:
+        if (current_move_result + option[1]) not in blacklist:
             player.last_move = option[1]
             return option[0]
+
+    previous_move = current_move_result + adversary.last_move
+    move_to_backlist(previous_move)
 
     player.last_move = options[0][1]
     return options[0][0]
 
 
-def move_command(player):
+def move_command(player, adversary):
     input_move = ''
 
     if player.artificial_intelligence:
-        input_move = artificial_intelligence_move(player)
+        input_move = artificial_intelligence_move(player, adversary)
     else:
         input_move = input('  %s plays: ' % (player.name))
 
@@ -192,10 +203,10 @@ def move_command(player):
     return input_move
 
 
-def player_move(player):
+def player_move(player, adversary):
     move = ''
     while move.strip() == '':
-        move = move_command(player)
+        move = move_command(player, adversary)
     if someone_wins() :
         display_layout()
         player.winner = True
@@ -209,9 +220,9 @@ def start_game(player1, player2):
         display_layout()
 
         if(player1_turn):
-            player_move(player1)
+            player_move(player1, player2)
         else:
-            player_move(player2)
+            player_move(player2, player1)
 
         player1_turn = not player1_turn
 
@@ -227,14 +238,16 @@ def update_blacklist_file():
     blacklist_moves_file.close()
 
 
+def move_to_backlist(move):
+    if move not in blacklist:
+        blacklist.append(move)
+        update_blacklist_file() 
+
+
 def update_black_list_if_necessary_by_penultimate_move(player, adversary):
     if player.artificial_intelligence and not player.winner and adversary.winner:
         last_move_result = get_current_move_result(player) + adversary.last_move
-
-        if last_move_result not in blacklist:
-            blacklist.append(last_move_result)
-            update_blacklist_file()    
-
+        move_to_backlist(last_move_result) 
 
 
 # setting blacklist file -----------------------
@@ -254,6 +267,9 @@ else:
     for str_num in array_of_string_number:
         blacklist.append(int(str_num))
 
+print("blacklist length = %s" % len(blacklist))
+input("...")
+
 
 # settings and starting the game --------------------------------
 player1 = set_players(1, 'x')
@@ -266,7 +282,7 @@ display_information()
 
 
 
-for i in range(100000):
+for i in range(20000):
     start_game(player1, player2)
     update_black_list_if_necessary_by_penultimate_move(player1, player2)
     update_black_list_if_necessary_by_penultimate_move(player2, player1)

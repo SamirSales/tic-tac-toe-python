@@ -11,18 +11,53 @@ coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,n
 coordinates_ai_values = [[1,2,6], [24,120,720], [5040,40320,362880]]
 
 
-BLACKLIST_FILE_NAME = "blacklist_moves.txt"
-blacklist_file_exists = False
-blacklist = []
+# start of MoveList class -----------------------------------------------
 
-WHITE_FILE_NAME = "whitelist_moves.txt"
-whitelist_file_exists = False
-whitelist = []
+class MoveList(object):
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.file_exists = False
+        self.moves = []
+        self.create_file_if_necessary_and_extract_moves_if_possible()
 
-GREY_FILE_NAME = "whitelist_moves.txt"
-greylist_file_exists = False
-greylist = []
 
+    def create_file_if_necessary_and_extract_moves_if_possible(self):
+        for file in os.listdir("."):
+            if file == self.file_name:
+                self.file_exists = True
+                break
+
+        if not self.file_exists:
+            self.update_list_file()
+        else:
+            list_moves_file = open(self.file_name, "r+")
+            array_in_str = list_moves_file.read()
+            list_moves_file.close()
+            array_in_str = array_in_str.replace(' ', '').replace('[', '').replace(']', '')
+            array_of_string_number = array_in_str.split(',')
+            for str_num in array_of_string_number:
+                self.moves.append(int(str_num))
+
+
+    def update_list_file(self):
+        blacklist_moves_file = open(self.file_name, "w")
+        blacklist_moves_file.write('%s' % self.moves)
+        blacklist_moves_file.close()
+
+
+    def add_move(self, move):
+        if move not in self.moves:
+            self.moves.append(move)
+            self.update_list_file() 
+
+
+# end of MoveList class -----------------------------------------------
+
+blacklist = MoveList("blacklist_moves.txt")
+whitelist = MoveList("whitelist_moves.txt")
+greylist = MoveList("greylist_moves.txt")
+
+# start of Player class -----------------------------------------------
 
 class Player(object):
     def __init__(self, name, number, symbol, artificial_intelligence):
@@ -33,6 +68,8 @@ class Player(object):
         self.winner = False
         self.last_move = 0
 
+
+# end of Player class -----------------------------------------------
 
 def display_label():
     print ('\n    ***********************')
@@ -159,12 +196,12 @@ def artificial_intelligence_move(player, adversary):
     current_move_result = get_current_move_result(player)
     
     for option in options:
-        if (current_move_result + option[1]) not in blacklist:
+        if (current_move_result + option[1]) not in blacklist.moves:
             player.last_move = option[1]
             return option[0]
 
     previous_move = current_move_result + adversary.last_move
-    move_to_backlist(previous_move)
+    blacklist.add_move(previous_move)
 
     player.last_move = options[0][1]
     return options[0][0]
@@ -232,42 +269,14 @@ def start_game(player1, player2):
             break
 
 
-def update_blacklist_file():
-    blacklist_moves_file = open(BLACKLIST_FILE_NAME, "w")
-    blacklist_moves_file.write('%s' % blacklist)
-    blacklist_moves_file.close()
-
-
-def move_to_backlist(move):
-    if move not in blacklist:
-        blacklist.append(move)
-        update_blacklist_file() 
-
-
-def update_black_list_if_necessary_by_penultimate_move(player, adversary):
+def update_blacklist_if_necessary_by_penultimate_move(player, adversary):
     if player.artificial_intelligence and not player.winner and adversary.winner:
         last_move_result = get_current_move_result(player) + adversary.last_move
-        move_to_backlist(last_move_result) 
+        blacklist.add_move(last_move_result) 
 
 
 # setting blacklist file -----------------------
-for file in os.listdir("."):
-    if file == BLACKLIST_FILE_NAME:
-        blacklist_file_exists = True
-        break
-
-if not blacklist_file_exists:
-    update_blacklist_file()
-else:
-    blacklist_moves_file = open(BLACKLIST_FILE_NAME, "r+")
-    array_in_str = blacklist_moves_file.read()
-    blacklist_moves_file.close()
-    array_in_str = array_in_str.replace(' ', '').replace('[', '').replace(']', '')
-    array_of_string_number = array_in_str.split(',')
-    for str_num in array_of_string_number:
-        blacklist.append(int(str_num))
-
-print("blacklist length = %s" % len(blacklist))
+print("blacklist length = %s" % len(blacklist.moves))
 input("...")
 
 
@@ -276,16 +285,16 @@ player1 = set_players(1, 'x')
 player2 = set_players(2, 'o')
 display_information()
 # start_game(player1, player2)
-# update_black_list_if_necessary_by_penultimate_move(player1, player2)
-# update_black_list_if_necessary_by_penultimate_move(player2, player1)
+# update_blacklist_if_necessary_by_penultimate_move(player1, player2)
+# update_blacklist_if_necessary_by_penultimate_move(player2, player1)
 
 
 
 
 for i in range(20000):
     start_game(player1, player2)
-    update_black_list_if_necessary_by_penultimate_move(player1, player2)
-    update_black_list_if_necessary_by_penultimate_move(player2, player1)
+    update_blacklist_if_necessary_by_penultimate_move(player1, player2)
+    update_blacklist_if_necessary_by_penultimate_move(player2, player1)
 
     player1.winner = False
     player2.winner = False

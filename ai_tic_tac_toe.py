@@ -5,10 +5,10 @@ from random import shuffle
 null_mark_1 = '__'
 null_mark_2 = '  '
 coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,null_mark_1], [null_mark_2,null_mark_2,null_mark_2]]
-# coordinates_ai_values = [[2,4,8],[16,32,64],[128,256,512]]
+coordinates_ai_values = [[2,4,8],[16,32,64],[128,256,512]]
 # coordinates_ai_values = [[2, 3, 5], [7, 11, 13], [17, 19, 23]]
 # coordinates_ai_values = [[2, 3, 7], [13, 26, 52], [79, 132, 212]]
-coordinates_ai_values = [[1,2,6], [24,120,720], [5040,40320,362880]]
+# coordinates_ai_values = [[1,2,6], [24,120,720], [5040,40320,362880]]
 
 
 # start of MoveList class -----------------------------------------------
@@ -33,10 +33,13 @@ class MoveList(object):
             list_moves_file = open(self.file_name, "r+")
             array_in_str = list_moves_file.read()
             list_moves_file.close()
-            array_in_str = array_in_str.replace(' ', '').replace('[', '').replace(']', '')
-            array_of_string_number = array_in_str.split(',')
-            for str_num in array_of_string_number:
-                self.moves.append(int(str_num))
+
+            if array_in_str != '[]':
+                array_in_str = array_in_str.replace(' ', '').replace('[', '').replace(']', '')
+                array_of_string_number = array_in_str.split(',')
+                
+                for str_num in array_of_string_number:
+                    self.moves.append(int(str_num))
 
 
     def update_list_file(self):
@@ -196,6 +199,11 @@ def artificial_intelligence_move(player, adversary):
     current_move_result = get_current_move_result(player)
     
     for option in options:
+        if (current_move_result + option[1]) in whitelist.moves:
+            player.last_move = option[1]
+            return option[0]
+
+    for option in options:
         if (current_move_result + option[1]) not in blacklist.moves:
             player.last_move = option[1]
             return option[0]
@@ -269,14 +277,25 @@ def start_game(player1, player2):
             break
 
 
-def update_blacklist_if_necessary_by_penultimate_move(player, adversary):
-    if player.artificial_intelligence and not player.winner and adversary.winner:
-        last_move_result = get_current_move_result(player) + adversary.last_move
-        blacklist.add_move(last_move_result) 
+def update_move_lists_if_necessary(player, adversary):
+    if player.artificial_intelligence:
+        if not player.winner and adversary.winner:
+            last_move_result = get_current_move_result(player) + adversary.last_move
+            blacklist.add_move(last_move_result) 
+        elif player.winner and not adversary.winner:
+            last_move_result = get_current_move_result(player)
+            whitelist.add_move(last_move_result) 
+        elif not player.winner and not adversary.winner:
+            last_move_result = get_current_move_result(player)
+            if player.number == 1:                
+                greylist.add_move(last_move_result) 
+            elif player.number == 2:
+                greylist.add_move(last_move_result + adversary.last_move) 
 
 
 # setting blacklist file -----------------------
-print("blacklist length = %s" % len(blacklist.moves))
+print("blacklist length = %s \n" % len(blacklist.moves))
+print("whitelist length = %s" % len(whitelist.moves))
 input("...")
 
 
@@ -285,16 +304,16 @@ player1 = set_players(1, 'x')
 player2 = set_players(2, 'o')
 display_information()
 # start_game(player1, player2)
-# update_blacklist_if_necessary_by_penultimate_move(player1, player2)
-# update_blacklist_if_necessary_by_penultimate_move(player2, player1)
+# update_move_lists_if_necessary(player1, player2)
+# update_move_lists_if_necessary(player2, player1)
 
 
 
 
 for i in range(20000):
     start_game(player1, player2)
-    update_blacklist_if_necessary_by_penultimate_move(player1, player2)
-    update_blacklist_if_necessary_by_penultimate_move(player2, player1)
+    update_move_lists_if_necessary(player1, player2)
+    update_move_lists_if_necessary(player2, player1)
 
     player1.winner = False
     player2.winner = False

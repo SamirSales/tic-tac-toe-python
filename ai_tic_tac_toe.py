@@ -6,9 +6,6 @@ null_mark_1 = '__'
 null_mark_2 = '  '
 coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,null_mark_1], [null_mark_2,null_mark_2,null_mark_2]]
 coordinates_ai_values = [[2,4,8],[16,32,64],[128,256,512]]
-# coordinates_ai_values = [[2, 3, 5], [7, 11, 13], [17, 19, 23]]
-# coordinates_ai_values = [[2, 3, 7], [13, 26, 52], [79, 132, 212]]
-# coordinates_ai_values = [[1,2,6], [24,120,720], [5040,40320,362880]]
 
 
 # start of MoveList class -----------------------------------------------
@@ -58,7 +55,6 @@ class MoveList(object):
 
 blacklist = MoveList("blacklist_moves.txt")
 whitelist = MoveList("whitelist_moves.txt")
-greylist = MoveList("greylist_moves.txt")
 
 # start of Player class -----------------------------------------------
 
@@ -285,12 +281,6 @@ def update_move_lists_if_necessary(player, adversary):
         elif player.winner and not adversary.winner:
             last_move_result = get_current_move_result(player)
             whitelist.add_move(last_move_result) 
-        elif not player.winner and not adversary.winner:
-            last_move_result = get_current_move_result(player)
-            if player.number == 1:                
-                greylist.add_move(last_move_result) 
-            elif player.number == 2:
-                greylist.add_move(last_move_result + adversary.last_move) 
 
 
 # setting blacklist file -----------------------

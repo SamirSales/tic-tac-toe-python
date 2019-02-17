@@ -5,7 +5,7 @@ from random import shuffle
 null_mark_1 = '__'
 null_mark_2 = '  '
 coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,null_mark_1], [null_mark_2,null_mark_2,null_mark_2]]
-coordinates_ai_values = [[2,4,8],[16,32,64],[128,256,512]]
+coordinates_ai_values = [[[1,2,4],[8,16,32],[64,128,256]],[[512,1024,2048],[4096,8192,16384],[32768,65536,131072]]]
 
 
 # start of MoveList class -----------------------------------------------
@@ -169,9 +169,9 @@ def get_current_move_result(player):
         for index_c in range(len(row)):
             col = row[index_c]
             if col == "_" + player.symbol or col == " " + player.symbol:
-                result += coordinates_ai_values[index_r][index_c]
+                result += coordinates_ai_values[0][index_r][index_c]
             elif col != null_mark_1 and col != null_mark_2:
-                result -= coordinates_ai_values[index_r][index_c]
+                result += coordinates_ai_values[1][index_r][index_c]
     return result
 
 
@@ -187,24 +187,35 @@ def artificial_intelligence_move(player, adversary):
         for index_c in range(len(row)):
             col = row[index_c]
             if col == null_mark_1 or col == null_mark_2:
-                new_move = [(rows[index_r] + cols[index_c]), coordinates_ai_values[index_r][index_c]]
+                new_move = [(rows[index_r] + cols[index_c]), coordinates_ai_values[0][index_r][index_c]]
                 options.append(new_move)
 
     # good to avoid the same draw game
     shuffle(options) 
     current_move_result = get_current_move_result(player)
+    adversary_current_move_result = get_current_move_result(adversary)
     
     for option in options:
         if (current_move_result + option[1]) in whitelist.moves:
             player.last_move = option[1]
             return option[0]
 
+        if (adversary_current_move_result + option[1]) in whitelist.moves:
+            blacklist.add_move(current_move_result + option[1])
+
+    # blacklist_moves_counter = 0
+    # for option in options:
+    #     if (current_move_result + option[1]) in blacklist.moves:
+    #         blacklist_moves_counter += 1
+    #     if blacklist_moves_counter >= 2:
+    #         blacklist.add_move(current_move_result - adversary.last_move)
+
     for option in options:
         if (current_move_result + option[1]) not in blacklist.moves:
             player.last_move = option[1]
             return option[0]
-
-    previous_move = current_move_result + adversary.last_move
+            
+    previous_move = current_move_result - adversary.last_move
     blacklist.add_move(previous_move)
 
     player.last_move = options[0][1]
@@ -232,7 +243,7 @@ def move_command(player, adversary):
             row = 2
         column = int(input_move[1]) - 1
 
-        player.last_move = coordinates_ai_values[row][column]
+        player.last_move = coordinates_ai_values[0][row][column]
 
         if coordinates[row][column] == null_mark_1:
             coordinates[row][column] = '_' + player.symbol
@@ -276,10 +287,12 @@ def start_game(player1, player2):
 def update_move_lists_if_necessary(player, adversary):
     if player.artificial_intelligence:
         if not player.winner and adversary.winner:
-            last_move_result = get_current_move_result(player) + adversary.last_move
+            last_move_result = get_current_move_result(player) - adversary.last_move
             blacklist.add_move(last_move_result) 
         elif player.winner and not adversary.winner:
             last_move_result = get_current_move_result(player)
+            # if last_move_result == 62:
+            #     input('...')
             whitelist.add_move(last_move_result) 
 
 

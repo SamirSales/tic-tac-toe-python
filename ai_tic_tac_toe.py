@@ -7,8 +7,11 @@ null_mark_2 = '  '
 coordinates = [[null_mark_1,null_mark_1,null_mark_1], [null_mark_1,null_mark_1,null_mark_1], [null_mark_2,null_mark_2,null_mark_2]]
 coordinates_ai_values = [[[1,2,4],[8,16,32],[64,128,256]],[[512,1024,2048],[4096,8192,16384],[32768,65536,131072]]]
 
+player_1_victories = 0
+player_2_victories = 0
+drawgame_result = 0
 
-# start of MoveList class -----------------------------------------------
+# beginning of MoveList class -----------------------------------------------
 
 class MoveList(object):
     def __init__(self, file_name):
@@ -56,7 +59,7 @@ class MoveList(object):
 blacklist = MoveList("blacklist_moves.txt")
 whitelist = MoveList("whitelist_moves.txt")
 
-# start of Player class -----------------------------------------------
+# beginning of Player class -----------------------------------------------
 
 class Player(object):
     def __init__(self, name, number, symbol, artificial_intelligence):
@@ -68,7 +71,16 @@ class Player(object):
         self.last_move = 0
 
 
-# end of Player class -----------------------------------------------
+# beginning of Move class -----------------------------------------------
+
+class Move(object):
+    def __init__(self, coordinate, value, adversary_value, row, column):
+        self.coordinate = coordinate
+        self.value = value
+        self.adversary_value = adversary_value
+        self.row = row
+        self.column = column
+
 
 def display_label():
     print ('\n    ***********************')
@@ -80,9 +92,9 @@ def display_layout():
     os.system('clear')
     display_label()
     print ('            1  2  3')
-    print ('         a %s|%s|%s' % (coordinates[0][0], coordinates[0][1], coordinates[0][2]))
-    print ('         b %s|%s|%s' % (coordinates[1][0], coordinates[1][1], coordinates[1][2]))
-    print ('         c %s|%s|%s' % (coordinates[2][0], coordinates[2][1], coordinates[2][2]))
+    print ('         a %s|%s|%s       Player 1: %s' % (coordinates[0][0], coordinates[0][1], coordinates[0][2], player_1_victories))
+    print ('         b %s|%s|%s       Player 2: %s' % (coordinates[1][0], coordinates[1][1], coordinates[1][2], player_2_victories))
+    print ('         c %s|%s|%s       Draw game: %s' % (coordinates[2][0], coordinates[2][1], coordinates[2][2], drawgame_result))
     print ('\n')
 
 
@@ -175,7 +187,7 @@ def get_current_move_result(player):
     return result
 
 
-def artificial_intelligence_move(player, adversary):
+def get_move_options():
     options = []
     rows = ['a', 'b', 'c']
     cols = ['1', '2', '3']
@@ -187,8 +199,23 @@ def artificial_intelligence_move(player, adversary):
         for index_c in range(len(row)):
             col = row[index_c]
             if col == null_mark_1 or col == null_mark_2:
-                new_move = [(rows[index_r] + cols[index_c]), coordinates_ai_values[0][index_r][index_c]]
-                options.append(new_move)
+                options.append(Move((rows[index_r] + cols[index_c]), coordinates_ai_values[0][index_r][index_c], coordinates_ai_values[1][index_r][index_c], index_r, index_c))
+    return options
+
+
+def adversary_could_win(adversary_current_move_result, move_options, move):
+    next_move_result = adversary_current_move_result + move.adversary_value
+    
+    for option in move_options:
+        if move.row != option.row and move.column != option.column:
+            player_option = next_move_result + option.value
+            if player_option in whitelist.moves:
+                return True
+    return False
+
+
+def artificial_intelligence_move(player, adversary):
+    options = get_move_options()
 
     # good to avoid the same draw game
     shuffle(options) 
@@ -196,30 +223,23 @@ def artificial_intelligence_move(player, adversary):
     adversary_current_move_result = get_current_move_result(adversary)
     
     for option in options:
-        if (current_move_result + option[1]) in whitelist.moves:
-            player.last_move = option[1]
-            return option[0]
+        if (current_move_result + option.value) in whitelist.moves:
+            player.last_move = option.value
+            return option.coordinate
 
-        if (adversary_current_move_result + option[1]) in whitelist.moves:
-            blacklist.add_move(current_move_result + option[1])
-
-    # blacklist_moves_counter = 0
-    # for option in options:
-    #     if (current_move_result + option[1]) in blacklist.moves:
-    #         blacklist_moves_counter += 1
-    #     if blacklist_moves_counter >= 2:
-    #         blacklist.add_move(current_move_result - adversary.last_move)
+        if (current_move_result+option.value) not in blacklist.moves and adversary_could_win(adversary_current_move_result, options, option):
+            blacklist.add_move(current_move_result + option.value)
 
     for option in options:
-        if (current_move_result + option[1]) not in blacklist.moves:
-            player.last_move = option[1]
-            return option[0]
+        if (current_move_result + option.value) not in blacklist.moves:
+            player.last_move = option.value
+            return option.coordinate
             
     previous_move = current_move_result - adversary.last_move
     blacklist.add_move(previous_move)
 
-    player.last_move = options[0][1]
-    return options[0][0]
+    player.last_move = options[0].value
+    return options[0].coordinate
 
 
 def move_command(player, adversary):
@@ -296,11 +316,9 @@ def update_move_lists_if_necessary(player, adversary):
             whitelist.add_move(last_move_result) 
 
 
-# setting blacklist file -----------------------
 print("blacklist length = %s \n" % len(blacklist.moves))
 print("whitelist length = %s" % len(whitelist.moves))
 input("...")
-
 
 # settings and starting the game --------------------------------
 player1 = set_players(1, 'x')
@@ -311,12 +329,17 @@ display_information()
 # update_move_lists_if_necessary(player2, player1)
 
 
-
-
 for i in range(20000):
     start_game(player1, player2)
     update_move_lists_if_necessary(player1, player2)
     update_move_lists_if_necessary(player2, player1)
+
+    if player1.winner:
+        player_1_victories += 1
+    elif player2.winner:
+        player_2_victories += 1
+    else:
+        drawgame_result += 1
 
     player1.winner = False
     player2.winner = False

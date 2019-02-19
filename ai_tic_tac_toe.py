@@ -214,6 +214,24 @@ def adversary_could_win(adversary_current_move_result, move_options, move):
     return False
 
 
+def get_adversary_correspondent_last_move_value(adversary_last_move):
+    index_adversary_row_last_value = 0
+    index_adversary_col_last_value = 0
+    coordinate_found = False
+
+    for row in coordinates_ai_values[0]:
+        index_adversary_col_last_value = 0
+        for col in row:
+            if col == adversary_last_move:
+                coordinate_found = True
+                break
+            index_adversary_col_last_value += 1
+        if coordinate_found:
+            break
+        index_adversary_row_last_value += 1
+    return coordinates_ai_values[1][index_adversary_row_last_value][index_adversary_col_last_value]
+
+
 def artificial_intelligence_move(player, adversary):
     options = get_move_options()
 
@@ -235,7 +253,7 @@ def artificial_intelligence_move(player, adversary):
             player.last_move = option.value
             return option.coordinate
             
-    previous_move = current_move_result - adversary.last_move
+    previous_move = current_move_result - get_adversary_correspondent_last_move_value(adversary.last_move)
     blacklist.add_move(previous_move)
 
     player.last_move = options[0].value
@@ -307,12 +325,12 @@ def start_game(player1, player2):
 def update_move_lists_if_necessary(player, adversary):
     if player.artificial_intelligence:
         if not player.winner and adversary.winner:
-            last_move_result = get_current_move_result(player) - adversary.last_move
+            adversary_last_move_value = get_adversary_correspondent_last_move_value(adversary.last_move)
+
+            last_move_result = get_current_move_result(player) - adversary_last_move_value
             blacklist.add_move(last_move_result) 
         elif player.winner and not adversary.winner:
             last_move_result = get_current_move_result(player)
-            # if last_move_result == 62:
-            #     input('...')
             whitelist.add_move(last_move_result) 
 
 
